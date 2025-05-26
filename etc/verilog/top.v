@@ -1,8 +1,9 @@
-module top(input clk,             // 12 MHz clock
-           input uart_rx_i,       // UART RX input
-           output uart_tx_o,      // UART TX output
-           output reg LED);       // Blinks on valid RX
-
+module top(
+    input clk,
+    input uart_rx_i,
+    output uart_tx_o,
+    output reg LED
+);
     wire [7:0] rx_data;
     wire rx_ready;
     reg tx_start = 0;
@@ -13,29 +14,27 @@ module top(input clk,             // 12 MHz clock
     reg [23:0] blink_timer = 0;
     reg blink = 0;
 
-    // TX state latch
+    // TX FSM
     reg sending = 0;
     reg [7:0] next_tx_data = 0;
     reg stage = 0;
 
-    localparam [7:0] ADD_CONST = 8'd42;  // Example constant
+    // RX FSM
+    reg [7:0] opcode = 0;
+    reg [7:0] operand = 0;
+    reg rx_state = 0;
+    reg evaluate = 0;
+
+    localparam [7:0] ADD_CONST = 8'd42;
+    localparam [7:0] UNKNOWN_OPCODE = 8'hFF;
 
     // ALU outputs
     wire [7:0] sum;
     wire flag_c, flag_z, flag_s, flag_pv, flag_h, flag_n;
 
-    // Instantiate RX (oversampled)
-    uart_rx #(.CLK_FREQ(12_000_000), .BAUD(9600)) uart_rx_inst (
-        .clk(clk),
-        .rst(1'b0),
-        .rx(uart_rx_i),
-        .data_out(rx_data),
-        .data_ready(rx_ready)
-    );
-
     z80_adder alu (
-        .a(rx_data),
-        .b(ADD_CONST),
+        .a(ADD_CONST),
+        .b(operand),
         .result(sum),
         .flag_c(flag_c),
         .flag_z(flag_z),
@@ -47,7 +46,14 @@ module top(input clk,             // 12 MHz clock
 
     wire [7:0] flags = {flag_s, flag_z, 1'b0, flag_h, 1'b0, flag_pv, flag_n, flag_c};
 
-    // Instantiate TX (standard FSM)
+    uart_rx #(.CLK_FREQ(12_000_000), .BAUD(9600)) uart_rx_inst (
+        .clk(clk),
+        .rst(1'b0),
+        .rx(uart_rx_i),
+        .data_out(rx_data),
+        .data_ready(rx_ready)
+    );
+
     uart_tx #(.CLKS_PER_BIT(1250)) uart_tx_inst (
         .clk(clk),
         .rst(1'b0),
@@ -60,19 +66,38 @@ module top(input clk,             // 12 MHz clock
     always @(posedge clk) begin
         tx_start <= 0;
 
-        if (rx_ready && !sending) begin
-            tx_data <= sum;
-            next_tx_data <= flags;
+        // UART RX 2-byte command
+        if (rx_ready && !sending && !evaluate) begin
+            if (rx_state == 0) begin
+                opcode <= rx_data;
+                rx_state <= 1;
+            end else begin
+                operand <= rx_data;
+                rx_state <= 0;
+                evaluate <= 1; // wait one cycle before reading ALU output
+            end
+        end
+
+        // ALU evaluation (1 cycle after operand is latched)
+        if (evaluate) begin
+            evaluate <= 0;
+
+            if (opcode[7:3] == 5'b10000) begin // check for ADD A, r family
+                tx_data <= sum;
+                next_tx_data <= flags;
+            end else begin
+                tx_data <= UNKNOWN_OPCODE;
+                next_tx_data <= 8'h00;
+            end
 
             tx_start <= 1;
             sending <= 1;
             stage <= 0;
-
-            // Blink LED briefly
             blink <= 1;
             blink_timer <= 0;
         end
 
+        // UART TX 2-byte response
         if (sending && !tx_busy && !tx_start) begin
             if (stage == 0) begin
                 tx_data <= next_tx_data;
@@ -91,5 +116,4 @@ module top(input clk,             // 12 MHz clock
 
         LED <= blink;
     end
-
 endmodule
