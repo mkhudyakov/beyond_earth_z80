@@ -16,6 +16,8 @@ module top(input clk,             // 12 MHz clock
     // TX state latch
     reg sending = 0;
 
+    localparam [7:0] ADD_CONST = 8'd42;  // Example constant
+
     // Instantiate RX (oversampled)
     uart_rx #(.CLK_FREQ(12_000_000), .BAUD(9600)) uart_rx_inst (
         .clk(clk),
@@ -40,9 +42,11 @@ module top(input clk,             // 12 MHz clock
         tx_start <= 0;
 
         if (rx_ready && !sending) begin
-            tx_data <= rx_data;
+            tx_data <= rx_data + ADD_CONST;
             tx_start <= 1;
             sending <= 1;
+
+            // Blink LED briefly
             blink <= 1;
             blink_timer <= 0;
         end
