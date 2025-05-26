@@ -1,6 +1,6 @@
 # Makefile for building Z80 FPGA project
 
-SRC = top.v uart/uart_rx.v uart/uart_tx.v
+SRC = top.v uart/uart_rx.v uart/uart_tx.v alu/z80_adder.v
 
 all: top.bin
 
