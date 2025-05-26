@@ -1,3 +1,10 @@
+## OpCode
+
+```
+ALU - 10
+ADD - 000
+```
+
 ## Scenarios
 
 | #  | A        | B        | A + B    | Flags Set       | Notes                                     |
