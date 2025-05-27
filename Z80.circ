@@ -606,17 +606,11 @@
       <a name="text" val="SUB - 010"/>
     </comp>
     <comp loc="(1190,250)" name="CPU_XOR"/>
-    <comp loc="(430,800)" name="CPU_DECODER_3x8">
-      <a name="label" val="CPU_DECODER_3x8_1"/>
-    </comp>
+    <comp loc="(430,800)" name="CPU_DECODER_3x8"/>
     <comp loc="(590,250)" name="CPU_AND"/>
-    <comp loc="(590,520)" name="CPU_ADD">
-      <a name="label" val="CPU_ADD_1"/>
-    </comp>
+    <comp loc="(590,520)" name="CPU_ADD"/>
     <comp loc="(890,250)" name="CPU_OR"/>
-    <comp loc="(890,520)" name="CPU_SUB">
-      <a name="label" val="CPU_SUB_1"/>
-    </comp>
+    <comp loc="(890,520)" name="CPU_SUB"/>
     <wire from="(1000,790)" to="(1000,840)"/>
     <wire from="(1010,460)" to="(1010,760)"/>
     <wire from="(1020,790)" to="(1020,890)"/>
@@ -697,7 +691,7 @@
     <wire from="(750,440)" to="(1050,440)"/>
     <wire from="(750,610)" to="(750,700)"/>
     <wire from="(750,610)" to="(770,610)"/>
-    <wire from="(750,700)" to="(1370,700)"/>
+    <wire from="(750,700)" to="(1100,700)"/>
     <wire from="(820,790)" to="(820,830)"/>
     <wire from="(830,400)" to="(830,460)"/>
     <wire from="(830,460)" to="(1010,460)"/>
