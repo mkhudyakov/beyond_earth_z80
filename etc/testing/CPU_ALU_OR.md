@@ -2,7 +2,7 @@
 
 ```
 ALU - 10
-ADD - 100
+ADD - 110
 ```
 
 ## Flags
@@ -11,7 +11,7 @@ ADD - 100
 |------|-----------------|----------------|
 | S    | Sign            | result[7]      |
 | Z    | Zero            | result == 0    |
-| H    | Half-carry      | 1              |
+| H    | Half-carry      | 0              |
 | P/V  | Parity/Overflow | parity(result) |
 | N    | Subtract        | 0              |
 | C    | Carry           | 0              |
